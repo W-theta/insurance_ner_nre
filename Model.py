@@ -1,14 +1,12 @@
 from Utils import scan_files, load_file
 
-import numpy as np
-import gensim
 from gensim.models.word2vec import LineSentence
 from gensim.models import Word2Vec
 import multiprocessing
 
 from keras.optimizers import Adam
 from keras import Input
-from keras.layers import Embedding, GRU, LSTM, Bidirectional,Dropout
+from keras.layers import Embedding, GRU, LSTM, Bidirectional, Dropout
 from keras_contrib.layers import CRF
 from keras.models import Model
 

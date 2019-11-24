@@ -2,8 +2,9 @@ from Entity import Document
 from Prepare_sents import SentenceExtractor
 from collections import Counter
 
+
 class DataSet:
-    def __init__(self, file_names:str, root_path:str, word2index=None, vocab_size=2000):
+    def __init__(self, file_names: str, root_path: str, word2index=None, vocab_size=2000):
         self.file_names = file_names
         self.vocab_size = vocab_size
 
@@ -57,12 +58,12 @@ class DataSet:
                     doc2idx.append(self.word2idx["_unk"])
             doc.text = doc2idx
             new_docs.append(doc)
-        self._docs = new_docs
+        return new_docs
 
     def get_sents_set(self, window_size, padding_size):
-        self.__vectorize()
+        docs = self.__vectorize()
         sents = []
-        for doc in self._docs:
+        for doc in docs:
             sent_extractor = SentenceExtractor(window_size, padding_size, doc)
             sentences = sent_extractor.extract()
             sents.append(sentences)

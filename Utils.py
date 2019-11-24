@@ -19,8 +19,3 @@ def load_file(path, file_name, file_type="txt"):
         elif file_type == "ann":
             data = f.readlines()
     return data
-
-
-# TODO 计算F1分数的函数
-def f1_score():
-    pass
