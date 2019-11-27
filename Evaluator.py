@@ -43,7 +43,7 @@ def __labels2entities(doc_labels: np.array) -> List[NamedEntity]:
     return entities
 
 
-def f1_score(pre_docs: List[Document], source_docs: List[Document]):
+def f1_score(pre_docs: List[Document], source_docs: List[Document], style='all'):
     """
     Arg:计算F1分数
     """
@@ -57,7 +57,7 @@ def f1_score(pre_docs: List[Document], source_docs: List[Document]):
 
         pre_entities_count += len(pre_entities)
         source_entities_count += len(source_entities)
-        right_entities_count += __count_intersects(pre_entities, source_entities)
+        right_entities_count += __count_intersects(pre_entities, source_entities,style)
 
     p = right_entities_count / pre_entities_count
     r = right_entities_count / source_entities_count
@@ -65,15 +65,20 @@ def f1_score(pre_docs: List[Document], source_docs: List[Document]):
     return f1, p, r
 
 
-def __count_intersects(pred_ent_list: List[NamedEntity], source_ent_list: List[NamedEntity]) -> int:
+def __count_intersects(pred_ent_list: List[NamedEntity], source_ent_list: List[NamedEntity], style='all') -> int:
     num_hits = 0
     source_ent_list = source_ent_list.copy()
     for ent_a in pred_ent_list:
         hit_ent = None
         for ent_b in source_ent_list:
-            if __check_match_all(ent_a, ent_b):
-                hit_ent = ent_b
-                break
+            if style == 'all':
+                if __check_match_all(ent_a, ent_b):
+                    hit_ent = ent_b
+                    break
+            else:
+                if __check_match(ent_a, ent_b):
+                    hit_ent = ent_b
+                    break
         if hit_ent is not None:
             num_hits += 1
             source_ent_list.remove(hit_ent)

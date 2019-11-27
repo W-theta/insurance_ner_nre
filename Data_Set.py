@@ -1,10 +1,10 @@
 from Entity import Document
 from Prepare_sents import SentenceExtractor
 from collections import Counter
-
+from typing import List
 
 class DataSet:
-    def __init__(self, file_names: str, root_path: str, word2index=None, vocab_size=2000):
+    def __init__(self, file_names: List[str], root_path: str, word2index=None, vocab_size=2000):
         self.file_names = file_names
         self.vocab_size = vocab_size
 
