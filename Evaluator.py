@@ -1,7 +1,7 @@
 from itertools import groupby
 from Data_Set import DataSet
 from Prepare_sents import Sentences, category2label
-from Entity import Document, NamedEntity
+from common.Entity import Document, NamedEntity
 import numpy as np
 from typing import List
 

@@ -1,17 +1,14 @@
-from Utils import scan_files, load_file
+from common.Utils import scan_files, load_file
 
 from gensim.models.word2vec import LineSentence
 from gensim.models import Word2Vec
 import multiprocessing
-import tensorflow as tf
 
 from keras.optimizers import Adam
 from keras import Input
-from keras.layers import Embedding, GRU, LSTM, Bidirectional, Dropout, Layer, Concatenate
+from keras.layers import Embedding, LSTM, Bidirectional, Dropout, Layer, Concatenate
 from keras_contrib.layers import CRF
 from keras.models import Model
-from keras.losses import sparse_categorical_crossentropy
-from keras.metrics import accuracy
 
 from keras import backend as K
 from keras import initializers, regularizers, constraints
@@ -174,7 +171,7 @@ class Attention(Layer):
                                       initializer=self.init, trainable=True)
         self.built = True
 
-    # TODO 这里没有去实践Mask的功能
+    # TODO 这里没有去实践Mask和多头的功能，所以比较简单
 
     def call(self, inputs, **kwargs):
         Q_ = K.dot(inputs, self.WQ)
