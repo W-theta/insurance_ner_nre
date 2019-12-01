@@ -219,6 +219,8 @@ class DataProcessor:
                 current_seq = Seq4ner(idx=idx, char_embs=s_emb, label_embs=l_emb)
                 seq_set.add(current_seq)
 
+            seq_set.char_embs = s_matrix
+            seq_set.label_embs = l_matrix
             seq_set_4dataset.append(seq_set)
 
             self._seqs_4ner_ds = seq_set_4dataset
@@ -228,8 +230,8 @@ class DataProcessor:
         if len(self.seqset_4ner_ds) == 0:
             raise ValueError("未进行数据预处理，请先调用data4NER再执行该接口")
         else:
-            s_embs = np.zeros(0)
-            l_embs = np.zeros(0)
+            s_embs = None
+            l_embs = None
             for idx, seq_set in enumerate(self.seqset_4ner_ds):
                 if idx == 0:
                     s_embs, l_embs = seq_set.get_data()
@@ -241,11 +243,11 @@ class DataProcessor:
     @staticmethod
     def __create_label_embs_4doc(doc: Document):
         # 根据实体的标注信息建立整篇doc的标注序列
-        doc_length = len(doc.text)
-        label_seq = np.zeros(doc_length)
-        entities = doc.entities
+        doc_length = len(doc.text)  # type:int
+        label_seq = np.zeros(doc_length)  # type:np.ndarray
+        entities = doc.entities  # type:NamedEntitySet
 
-        for entity in entities:
+        for entity in entities.get_all():
             start = int(entity.start_pos)
             end = int(entity.end_pos)
             label_seq[start:end] = category2label[entity.category]

@@ -1,49 +1,52 @@
 from itertools import groupby
-from Data_Set import DataSet
-from Prepare_sents import Sentences, category2label
-from common.Entity import Document, NamedEntity
+from Data import DataSet, DataProcessor, category2label
+from common.Entity import Document, NamedEntity, SeqSet4ner, NamedEntitySet
 import numpy as np
 from typing import List
 
 
-def merge_preds(testset: DataSet, preds: np.array, window_size: int, padding_size: int) -> List[Document]:
+def merge_preds4ner(testset: DataSet, test_processor: DataProcessor, preds: np.array) -> List[Document]:
     """
     Arg:将含有padding的多条预测片段序列，合并成1个完整的文章预测序列
     """
     preds = np.argmax(preds, axis=-1)
-    sents_set = testset.get_sents_set(window_size, padding_size)  # type:List[Sentences]
+    list_seq_set4ner = test_processor.seqset_4ner_ds  # type:List[SeqSet4ner]
     docs = testset.docs  # type:List[Document]
 
     pos_flag = 0
-    pre_docs = []
-    for sentences, doc in zip(sents_set, docs):
+    pre_docs = []  # type:List[Document]
+    for seq_set, doc in zip(list_seq_set4ner, docs):
         # 每一个doc的行数
-        sents_lines = sentences.sents.shape[0]
+        sents_lines = len(seq_set.seqs_dict)
         doc_labels = np.zeros(0)
+
+        window = seq_set.window_size
+        pad = seq_set.padding_size
+
         start_pos = pos_flag
         end_pos = pos_flag + sents_lines
         for pred_line in preds[start_pos:end_pos]:
-            doc_labels = np.append(doc_labels, pred_line[padding_size:(padding_size + window_size)])
-        d = Document(sentences.doc_name, "", doc.text, __labels2entities(doc_labels))
+            doc_labels = np.append(doc_labels, pred_line[pad:(pad + window)])
+        d = Document(seq_set.doc_name, "", doc.text, __labels2entities(doc.text, doc_labels))
         pos_flag = end_pos
         pre_docs.append(d)
     return pre_docs
 
 
-def __labels2entities(doc_labels: np.array) -> List[NamedEntity]:
+def __labels2entities(doc_text: str, doc_labels: np.array) -> NamedEntitySet:
     pos_flag = 0
-    entities = []
+    entities = NamedEntitySet()
     for idx, (category, group) in enumerate(groupby(doc_labels)):
         start = pos_flag
         end = pos_flag + len(list(group))
         if category != 0:
-            entity = NamedEntity(idx, category, start, end, "")
-            entities.append(entity)
+            entity = NamedEntity(str(idx), category, start, end, doc_text[start:end])
+            entities.add(entity)
         pos_flag = end
     return entities
 
 
-def f1_score(pre_docs: List[Document], source_docs: List[Document], style='all'):
+def f1_score4ner(pre_docs: List[Document], source_docs: List[Document], style='all'):
     """
     Arg:计算F1分数
     """
@@ -52,12 +55,12 @@ def f1_score(pre_docs: List[Document], source_docs: List[Document], style='all')
     right_entities_count = 0
 
     for pre_doc, source_doc in zip(pre_docs, source_docs):
-        pre_entities = pre_doc.entities
-        source_entities = source_doc.entities
+        pre_entities = pre_doc.entities.get_all()  # type:List[NamedEntity]
+        source_entities = source_doc.entities.get_all()  # type:List[NamedEntity]
 
         pre_entities_count += len(pre_entities)
         source_entities_count += len(source_entities)
-        right_entities_count += __count_intersects(pre_entities, source_entities,style)
+        right_entities_count += __count_intersects(pre_entities, source_entities, style)
 
     p = right_entities_count / pre_entities_count
     r = right_entities_count / source_entities_count
