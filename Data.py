@@ -267,3 +267,48 @@ class DataProcessor:
             X = seq_emb + pos_emb
             Y = np.zeros(0)
             return seq_emb, pos_emb, Y
+
+    def data4NER_Bert(self):
+        text_seq_list = []
+        label_seq_list = []
+
+        for doc in self.data_set.docs:
+            labels4doc = self.__create_label_embs_4doc(doc)
+            doc_text = doc.text  # type:str
+            # 以文章中的句号切分为自然句
+            seqs = doc_text.split("。")
+            seqs = [s + "。" for s in seqs]
+
+            start_pos = 0
+            for idx, curr_seq in enumerate(seqs):
+                seq_len = len(curr_seq)
+                start = start_pos
+                end = start_pos + seq_len
+                label_seq = list(labels4doc[start:end])
+
+                new_label_seq = []
+                # 标记位IO体系
+                for label in label_seq:
+                    if int(label) - 1 in label2category.keys():
+                        label = label2category[int(label) - 1]
+                    else:
+                        label = "O"
+                    new_label_seq.append(label)
+
+                # 重写为BIO体系
+                for idx, l in enumerate(new_label_seq):
+                    if idx == 0 or idx == len(new_label_seq) - 1:
+                        pass
+                    else:
+                        if new_label_seq[idx - 1] == "O":
+                            new_label_seq[idx] = "B_" + l
+                        elif new_label_seq[idx - 1][2:] == l:
+                            new_label_seq[idx] = "I_" + l
+
+                curr_seq = [c for c in curr_seq]
+
+                text_seq_list.append(curr_seq)
+                label_seq_list.append(new_label_seq)
+
+                start_pos = end
+        return text_seq_list, label_seq_list

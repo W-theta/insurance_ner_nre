@@ -13,6 +13,12 @@ from keras.models import Model
 from keras import backend as K
 from keras import initializers, regularizers, constraints
 
+import kashgari
+
+kashgari.config.use_cudnn_cell = True
+from kashgari.embeddings import BERTEmbedding
+from kashgari.tasks.labeling import BiLSTM_CRF_Model
+
 
 # 字-Vec的训练器
 class Char2VecTrainer:
@@ -194,6 +200,21 @@ class Attention(Layer):
             return input_shape[0], self.steps_dim, self.features_dim
         else:
             return input_shape[0], self.steps_dim, self.categeroy_count
+
+
+class BertTrainer:
+    def __init__(self, folder, seq_len, fine_tune=False):
+        self.folder = folder
+        self.seq_len = seq_len
+        self.fine_tune = fine_tune
+
+    def build(self):
+        embed = BERTEmbedding(model_folder=self.folder,
+                              task=kashgari.LABELING,
+                              trainable=self.fine_tune,
+                              sequence_length=self.seq_len)
+        model = BiLSTM_CRF_Model(embed)
+        return model
 
 
 # NER的原型网络小样本训练器

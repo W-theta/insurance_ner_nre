@@ -157,7 +157,7 @@ class SeqSet4re:
 
 class Document:
     def __init__(self, doc_name: str, root_path: str, text: str, entities: NamedEntitySet,
-                 entity_pairs: EntityPair = None):
+                 entity_pairs: List[EntityPair] = None):
         self.doc_name = doc_name
         self._root_path = root_path
         self._text = text
