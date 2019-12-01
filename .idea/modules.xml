@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/NER_MaxMa.iml" filepath="$PROJECT_DIR$/.idea/NER_MaxMa.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/insurance_ner_nre.iml" filepath="$PROJECT_DIR$/.idea/insurance_ner_nre.iml" />
     </modules>
   </component>
 </project>
